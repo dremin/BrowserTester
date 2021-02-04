@@ -27,6 +27,16 @@ namespace BrowserTester
             Navigate(string.Empty);
         }
 
+        private void MemoryTest()
+        {
+            for (int i = 0; i < 10000; i++)
+            {
+                ShellFolder folder = GetFolder("C:\\Windows");
+                int p = folder.Files.Count;
+                folder.Dispose();
+            }
+        }
+
         private ShellFolder GetFolder(string path)
         {
             return new ShellFolder(path, handle, true);
@@ -61,6 +71,7 @@ namespace BrowserTester
         {
             if (e.PropertyName == "LargeIcon")
             {
+                // The folder icon was fetched asynchronously and is now ready
                 Dispatcher.BeginInvoke(() =>
                 {
                     Icon = folder?.LargeIcon;
@@ -73,7 +84,8 @@ namespace BrowserTester
             WindowInteropHelper helper = new WindowInteropHelper(this);
             handle = helper.Handle;
         }
-        
+
+        #region Context menu command handlers
         private void executeAction(string action, ShellItem[] items)
         {
             foreach (var item in items)
@@ -100,7 +112,9 @@ namespace BrowserTester
                 ShellHelper.ShowFileProperties(path);
             }
         }
+        #endregion
 
+        #region UI actions
         private void Go_OnClick(object sender, RoutedEventArgs e)
         {
             Navigate(location.Text);
@@ -171,7 +185,12 @@ namespace BrowserTester
 
         private void DesktopButton_OnClick(object sender, RoutedEventArgs e)
         {
-            Navigate("::{B4BFCC3A-DB2C-424C-B029-7FE99A87C641}");
+            Navigate("shell:::{B4BFCC3A-DB2C-424C-B029-7FE99A87C641}");
+        }
+
+        private void ComputerButton_OnClick(object sender, RoutedEventArgs e)
+        {
+            Navigate(string.Empty);
         }
 
         private void ControlPanelButton_OnClick(object sender, RoutedEventArgs e)
@@ -179,10 +198,11 @@ namespace BrowserTester
             Navigate("::{21EC2020-3AEA-1069-A2DD-08002B30309D}");
         }
 
-        private void ComputerButton_OnClick(object sender, RoutedEventArgs e)
+        private void AppsButton_OnClick(object sender, RoutedEventArgs e)
         {
-            Navigate(string.Empty);
+            Navigate("shell:AppsFolder");
         }
+        #endregion
 
         private void MainWindow_OnClosing(object sender, CancelEventArgs e)
         {

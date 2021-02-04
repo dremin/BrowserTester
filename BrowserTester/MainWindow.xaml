@@ -26,14 +26,22 @@
             <Button Name="ControlPanelButton"
                     Click="ControlPanelButton_OnClick"
                     Content="Control Panel" />
+            <Button Name="AppsButton"
+                    Click="AppsButton_OnClick"
+                    Content="Applications" />
         </StackPanel>
         <ItemsControl Name="IconsControl"
                       DockPanel.Dock="Bottom">
-            <ItemsControl.ItemsPanel>
-                <ItemsPanelTemplate>
-                    <WrapPanel Orientation="Vertical"></WrapPanel>
-                </ItemsPanelTemplate>
-            </ItemsControl.ItemsPanel>
+            <ItemsControl.Template>
+                <ControlTemplate>
+                    <ScrollViewer HorizontalScrollBarVisibility="Auto"
+                                  VerticalScrollBarVisibility="Disabled"
+                                  FocusVisualStyle="{x:Null}">
+                        <WrapPanel Orientation="Vertical"
+                                   IsItemsHost="True" />
+                    </ScrollViewer>
+                </ControlTemplate>
+            </ItemsControl.Template>
             <ItemsControl.ItemTemplate>
                 <ItemContainerTemplate>
                     <Border ToolTip="{Binding Path=Path, Mode=OneWay}"
