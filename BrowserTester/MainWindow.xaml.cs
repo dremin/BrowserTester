@@ -1,7 +1,6 @@
 ﻿#nullable enable
 using System;
 using System.ComponentModel;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Interop;
@@ -43,17 +42,18 @@ namespace BrowserTester
 
         private void Navigate(string path)
         {
-            Task.Factory.StartNew(() =>
+            Dispatcher.BeginInvoke(() =>
             {
                 if (folder != null)
                 {
                     folder.PropertyChanged -= FolderOnPropertyChanged;
+                    folder.Dispose();
                 }
 
                 folder = GetFolder(path);
                 folder.PropertyChanged += FolderOnPropertyChanged;
 
-                Dispatcher.BeginInvoke(UpdateBrowser);
+                UpdateBrowser();
             });
         }
 
@@ -142,7 +142,7 @@ namespace BrowserTester
                 postBuilder.AddSeparator();
                 postBuilder.AddCommand(new ShellCommand { Flags = MFT.BYCOMMAND, Label = "Test Bottom", UID = (uint)CommonContextMenuItem.Properties });
 
-                ShellContextMenu menu = new ShellContextMenu(new ShellItem[] { file }, executeAction, true, preBuilder, postBuilder);
+                ShellContextMenu menu = new ShellContextMenu(new ShellItem[] { file }, handle, executeAction, true, preBuilder, postBuilder);
             }
 
             e.Handled = true;
@@ -154,7 +154,7 @@ namespace BrowserTester
 
             if (item is ShellFile file)
             {
-                ShellContextMenu menu = new ShellContextMenu(new ShellItem[] { file }, executeAction, false);
+                ShellContextMenu menu = new ShellContextMenu(new ShellItem[] { file }, handle, executeAction, false);
             }
 
             e.Handled = true;
@@ -165,6 +165,7 @@ namespace BrowserTester
             if (folder is ShellFolder shellFolder)
             {
                 Navigate(shellFolder.ParentItem.Path);
+                shellFolder.ParentItem.Dispose();
             }
         }
 
@@ -181,6 +182,11 @@ namespace BrowserTester
         private void ComputerButton_OnClick(object sender, RoutedEventArgs e)
         {
             Navigate(string.Empty);
+        }
+
+        private void MainWindow_OnClosing(object sender, CancelEventArgs e)
+        {
+            folder?.Dispose();
         }
     }
 }
