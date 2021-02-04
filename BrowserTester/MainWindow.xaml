@@ -4,29 +4,36 @@
         SourceInitialized="Window1_OnSourceInitialized"
         MouseRightButtonUp="Window1_OnMouseRightButtonUp"
         Closing="MainWindow_OnClosing"
-        Title="Window1" Height="450" Width="800" UseLayoutRounding="True">
+        Title="Window1" Height="500" Width="800" UseLayoutRounding="True">
     <DockPanel>
         <StackPanel Orientation="Horizontal"
                     DockPanel.Dock="Top">
             <TextBox Name="location"
+                     Padding="3,1"
                      Width="400"/>
             <Button Name="GoButton"
+                    Padding="3,1"
                     IsDefault="True"
                     Click="Go_OnClick"
                     Content="Go" />
             <Button Name="UpButton"
+                    Padding="3,1"
                     Click="UpButton_OnClick"
                     Content="Up" />
             <Button Name="DesktopButton"
+                    Padding="3,1"
                     Click="DesktopButton_OnClick"
                     Content="Desktop" />
             <Button Name="ComputerButton"
+                    Padding="3,1"
                     Click="ComputerButton_OnClick"
                     Content="Computer" />
             <Button Name="ControlPanelButton"
+                    Padding="3,1"
                     Click="ControlPanelButton_OnClick"
                     Content="Control Panel" />
             <Button Name="AppsButton"
+                    Padding="3,1"
                     Click="AppsButton_OnClick"
                     Content="Applications" />
         </StackPanel>
@@ -47,14 +54,17 @@
                     <Border ToolTip="{Binding Path=Path, Mode=OneWay}"
                             MouseRightButtonUp="UIElement_OnMouseRightButtonUp"
                             MouseLeftButtonUp="UIElement_OnMouseLeftButtonUp"
-                            Padding="2">
+                            Padding="4,3">
                         <StackPanel Orientation="Horizontal">
                             <Image Source="{Binding Path=LargeIcon, Mode=OneWay}"
                                    Width="32"
                                    Height="32" />
                             <TextBlock Text="{Binding Path=DisplayName, Mode=OneWay}"
-                                       Padding="2,0,0,0"
+                                       Padding="4,0,0,0"
                                        TextTrimming="CharacterEllipsis"
+                                       TextWrapping="Wrap"
+                                       VerticalAlignment="Center"
+                                       MaxHeight="32"
                                        Width="150" />
                         </StackPanel>
                     </Border>
