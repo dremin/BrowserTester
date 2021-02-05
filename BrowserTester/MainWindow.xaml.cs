@@ -17,6 +17,7 @@ namespace BrowserTester
     /// </summary>
     public partial class MainWindow : Window
     {
+        private readonly FileOperationWorker _fileWorker;
         private ShellFolder? folder;
         private IntPtr handle;
 
@@ -24,6 +25,7 @@ namespace BrowserTester
         {
             InitializeComponent();
 
+            _fileWorker = new FileOperationWorker();
             Navigate(string.Empty);
         }
 
@@ -108,6 +110,10 @@ namespace BrowserTester
             if (action == (uint) CommonContextMenuItem.Properties)
             {
                 ShellHelper.ShowFileProperties(path);
+            }
+            else if (action == (uint)CommonContextMenuItem.Paste)
+            {
+                _fileWorker.PasteFromClipboard(path);
             }
         }
 
