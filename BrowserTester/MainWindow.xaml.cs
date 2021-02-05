@@ -19,11 +19,11 @@ namespace BrowserTester
     {
         private ShellFolder? folder;
         private IntPtr handle;
-        
+
         public MainWindow()
         {
             InitializeComponent();
-            
+
             Navigate(string.Empty);
         }
 
@@ -39,9 +39,9 @@ namespace BrowserTester
 
         private ShellFolder GetFolder(string path)
         {
-            return new ShellFolder(path, handle, true);
+            return new ShellFolder(path, handle, false);
         }
-        
+
         private void UpdateBrowser()
         {
             Title = folder?.DisplayName;
@@ -72,10 +72,7 @@ namespace BrowserTester
             if (e.PropertyName == "LargeIcon")
             {
                 // The folder icon was fetched asynchronously and is now ready
-                Dispatcher.BeginInvoke(() =>
-                {
-                    Icon = folder?.LargeIcon;
-                });
+                Dispatcher.BeginInvoke(() => { Icon = folder?.LargeIcon; });
             }
         }
 
@@ -86,6 +83,7 @@ namespace BrowserTester
         }
 
         #region Context menu command handlers
+
         private void executeAction(string action, ShellItem[] items)
         {
             foreach (var item in items)
@@ -96,25 +94,84 @@ namespace BrowserTester
                 {
                     Navigate(item.Path);
                 }
-                else if (action == ((uint)CommonContextMenuItem.Properties).ToString())
+                else if (action == ((uint) CommonContextMenuItem.Properties).ToString())
                 {
                     ShellHelper.ShowFileProperties(item.Path);
                 }
             }
         }
-        
+
         private void folderAction(uint action, string path)
         {
             ShellLogger.Info($"Command: {action} Path: {path}");
 
-            if (action == (uint)CommonContextMenuItem.Properties)
+            if (action == (uint) CommonContextMenuItem.Properties)
             {
                 ShellHelper.ShowFileProperties(path);
             }
         }
+
+        #endregion
+
+        #region Context menu builders
+
+        private ShellCommandBuilder GetFolderCommandBuilder()
+        {
+            if (folder == null)
+            {
+                return new ShellCommandBuilder();
+            }
+
+            ShellCommandBuilder builder = new ShellCommandBuilder();
+            MFT flags = MFT.BYCOMMAND;
+
+            if (!folder.IsFileSystem)
+            {
+                flags |= MFT.DISABLED;
+            }
+
+            builder.AddCommand(new ShellCommand
+                {Flags = flags, Label = "Paste", UID = (uint) CommonContextMenuItem.Paste});
+            builder.AddSeparator();
+
+            if (folder.IsFileSystem)
+            {
+                builder.AddShellNewMenu();
+                builder.AddSeparator();
+            }
+
+            builder.AddCommand(new ShellCommand
+                {Flags = flags, Label = "Properties", UID = (uint) CommonContextMenuItem.Properties});
+
+            return builder;
+        }
+
+        private ShellCommandBuilder GetFileCommandBuilderTop()
+        {
+            ShellCommandBuilder builder = new ShellCommandBuilder();
+
+            builder.AddCommand(new ShellCommand
+                {Flags = MFT.BYCOMMAND, Label = "Test Top", UID = (uint) CommonContextMenuItem.Properties});
+            builder.AddSeparator();
+
+            return builder;
+        }
+
+        private ShellCommandBuilder GetFileCommandBuilderBottom()
+        {
+            ShellCommandBuilder builder = new ShellCommandBuilder();
+
+            builder.AddSeparator();
+            builder.AddCommand(new ShellCommand
+                {Flags = MFT.BYCOMMAND, Label = "Test Bottom", UID = (uint) CommonContextMenuItem.Properties});
+
+            return builder;
+        }
+
         #endregion
 
         #region UI actions
+
         private void Go_OnClick(object sender, RoutedEventArgs e)
         {
             Navigate(location.Text);
@@ -127,15 +184,7 @@ namespace BrowserTester
                 return;
             }
 
-            ShellCommandBuilder builder = new ShellCommandBuilder();
-            
-            builder.AddCommand(new ShellCommand {Flags = MFT.BYCOMMAND, Label = "Paste", UID = (uint)CommonContextMenuItem.Paste});
-            builder.AddSeparator();
-            builder.AddShellNewMenu();
-            builder.AddSeparator();
-            builder.AddCommand(new ShellCommand { Flags = MFT.BYCOMMAND, Label = "Properties", UID = (uint)CommonContextMenuItem.Properties });
-
-            ShellContextMenu menu = new ShellContextMenu(folder, folderAction, builder);
+            ShellContextMenu menu = new ShellContextMenu(folder, folderAction, GetFolderCommandBuilder());
 
             e.Handled = true;
         }
@@ -146,17 +195,8 @@ namespace BrowserTester
 
             if (item is ShellFile file)
             {
-                ShellCommandBuilder preBuilder = new ShellCommandBuilder();
-
-                preBuilder.AddCommand(new ShellCommand { Flags = MFT.BYCOMMAND, Label = "Test Top", UID = (uint)CommonContextMenuItem.Properties });
-                preBuilder.AddSeparator();
-
-                ShellCommandBuilder postBuilder = new ShellCommandBuilder();
-
-                postBuilder.AddSeparator();
-                postBuilder.AddCommand(new ShellCommand { Flags = MFT.BYCOMMAND, Label = "Test Bottom", UID = (uint)CommonContextMenuItem.Properties });
-
-                ShellContextMenu menu = new ShellContextMenu(new ShellItem[] { file }, handle, executeAction, true, preBuilder, postBuilder);
+                ShellContextMenu menu = new ShellContextMenu(new ShellItem[] {file}, handle, executeAction, true,
+                    GetFileCommandBuilderTop(), GetFileCommandBuilderBottom());
             }
 
             e.Handled = true;
@@ -168,7 +208,7 @@ namespace BrowserTester
 
             if (item is ShellFile file)
             {
-                ShellContextMenu menu = new ShellContextMenu(new ShellItem[] { file }, handle, executeAction, false);
+                ShellContextMenu menu = new ShellContextMenu(new ShellItem[] {file}, handle, executeAction, false);
             }
 
             e.Handled = true;
@@ -202,6 +242,7 @@ namespace BrowserTester
         {
             Navigate("shell:AppsFolder");
         }
+
         #endregion
 
         private void MainWindow_OnClosing(object sender, CancelEventArgs e)
