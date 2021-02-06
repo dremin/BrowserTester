@@ -1,7 +1,9 @@
 ﻿#nullable enable
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Windows;
+using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Threading;
@@ -20,6 +22,9 @@ namespace BrowserTester
         private readonly FileOperationWorker _fileWorker;
         private ShellFolder? folder;
         private IntPtr handle;
+
+        // Controls whether shell item enumeration occurs in the background. Slower but keeps UI responsive while loading large folders.
+        private bool enumAsync = false;
 
         public MainWindow()
         {
@@ -41,15 +46,36 @@ namespace BrowserTester
 
         private ShellFolder GetFolder(string path)
         {
-            return new ShellFolder(path, handle, false);
+            return new ShellFolder(path, handle, enumAsync);
         }
 
+        private ICollectionView GetCollectionView()
+        {
+            if (folder == null)
+            {
+                return CollectionViewSource.GetDefaultView(new List<ShellItem>());
+            }
+            
+            ICollectionView cvs = CollectionViewSource.GetDefaultView(folder.Files);
+            if (folder.IsFileSystem) cvs.SortDescriptions.Add(new SortDescription("IsFolder", ListSortDirection.Descending));
+            cvs.SortDescriptions.Add(new SortDescription("DisplayName", ListSortDirection.Ascending));
+
+            if (cvs is ICollectionViewLiveShaping cvls)
+            {
+                cvls.IsLiveSorting = true;
+                if (folder.IsFileSystem) cvls.LiveSortingProperties.Add("IsFolder");
+                cvls.LiveSortingProperties.Add("DisplayName");
+            }
+
+            return cvs;
+        }
+        
         private void UpdateBrowser()
         {
             Title = folder?.DisplayName;
             Icon = folder?.LargeIcon;
             location.Text = folder?.Path;
-            IconsControl.ItemsSource = folder?.Files;
+            IconsControl.ItemsSource = GetCollectionView();
         }
 
         private void Navigate(string path)
@@ -144,7 +170,7 @@ namespace BrowserTester
             });
             builder.AddSeparator();
 
-            if (folder.IsFileSystem)
+            if (folder.IsFileSystem && folder.IsFolder)
             {
                 builder.AddShellNewMenu();
                 builder.AddSeparator();

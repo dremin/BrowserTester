@@ -4,7 +4,10 @@
         SourceInitialized="Window1_OnSourceInitialized"
         MouseRightButtonUp="Window1_OnMouseRightButtonUp"
         Closing="MainWindow_OnClosing"
-        Title="Window1" Height="500" Width="800" UseLayoutRounding="True">
+        Title="BrowserTester"
+        Height="500"
+        Width="800"
+        UseLayoutRounding="True">
     <DockPanel>
         <StackPanel Orientation="Horizontal"
                     DockPanel.Dock="Top">
