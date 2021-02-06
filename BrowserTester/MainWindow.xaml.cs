@@ -254,7 +254,7 @@ namespace BrowserTester
 
             if (item is ShellFile file)
             {
-                ShellItemContextMenu menu = new ShellItemContextMenu(new ShellItem[] {file}, handle, executeAction, true,
+                ShellItemContextMenu menu = new ShellItemContextMenu(new ShellItem[] {file}, folder, handle, executeAction, true,
                     GetFileCommandBuilderTop(file), GetFileCommandBuilderBottom());
             }
 
@@ -267,7 +267,7 @@ namespace BrowserTester
 
             if (item is ShellFile file)
             {
-                ShellItemContextMenu menu = new ShellItemContextMenu(new ShellItem[] {file}, handle, executeAction, false);
+                ShellItemContextMenu menu = new ShellItemContextMenu(new ShellItem[] {file}, folder, handle, executeAction, false);
             }
 
             e.Handled = true;

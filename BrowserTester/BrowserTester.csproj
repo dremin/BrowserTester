@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="ManagedShell" Version="0.0.46-gbd73c0897f" />
+    <PackageReference Include="ManagedShell" Version="0.0.48-g98c4c2af49" />
   </ItemGroup>
 
 </Project>
