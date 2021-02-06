@@ -121,14 +121,14 @@ namespace BrowserTester
 
         #region Context menu builders
 
-        private ShellCommandBuilder GetFolderCommandBuilder()
+        private ShellMenuCommandBuilder GetFolderCommandBuilder()
         {
             if (folder == null)
             {
-                return new ShellCommandBuilder();
+                return new ShellMenuCommandBuilder();
             }
 
-            ShellCommandBuilder builder = new ShellCommandBuilder();
+            ShellMenuCommandBuilder builder = new ShellMenuCommandBuilder();
             MFT flags = MFT.BYCOMMAND;
 
             if (!folder.IsFileSystem)
@@ -136,8 +136,12 @@ namespace BrowserTester
                 flags |= MFT.DISABLED;
             }
 
-            builder.AddCommand(new ShellCommand
-                {Flags = flags, Label = "Paste", UID = (uint) CommonContextMenuItem.Paste});
+            builder.AddCommand(new ShellMenuCommand
+            {
+                Flags = flags,
+                Label = "Paste",
+                UID = (uint) CommonContextMenuItem.Paste
+            });
             builder.AddSeparator();
 
             if (folder.IsFileSystem)
@@ -146,30 +150,53 @@ namespace BrowserTester
                 builder.AddSeparator();
             }
 
-            builder.AddCommand(new ShellCommand
-                {Flags = flags, Label = "Properties", UID = (uint) CommonContextMenuItem.Properties});
+            builder.AddCommand(new ShellMenuCommand
+            {
+                Flags = flags,
+                Label = "Properties",
+                UID = (uint) CommonContextMenuItem.Properties
+            });
 
             return builder;
         }
 
-        private ShellCommandBuilder GetFileCommandBuilderTop()
+        private ShellMenuCommandBuilder GetFileCommandBuilderTop(ShellFile file)
         {
-            ShellCommandBuilder builder = new ShellCommandBuilder();
+            ShellMenuCommandBuilder builder = new ShellMenuCommandBuilder();
 
-            builder.AddCommand(new ShellCommand
-                {Flags = MFT.BYCOMMAND, Label = "Test Top", UID = (uint) CommonContextMenuItem.Properties});
+            builder.AddCommand(new ShellMenuCommand
+            {
+                Flags = MFT.BYCOMMAND,
+                Label = "Test Top",
+                UID = (uint) CommonContextMenuItem.Properties
+            });
+
+            if (file.IsFolder)
+            {
+                builder.AddCommand(new ShellMenuCommand
+                {
+                    Flags = MFT.BYCOMMAND,
+                    Label = "This is a folder!",
+                    UID = (uint) CommonContextMenuItem.Properties
+                });
+            }
+
             builder.AddSeparator();
 
             return builder;
         }
 
-        private ShellCommandBuilder GetFileCommandBuilderBottom()
+        private ShellMenuCommandBuilder GetFileCommandBuilderBottom()
         {
-            ShellCommandBuilder builder = new ShellCommandBuilder();
+            ShellMenuCommandBuilder builder = new ShellMenuCommandBuilder();
 
             builder.AddSeparator();
-            builder.AddCommand(new ShellCommand
-                {Flags = MFT.BYCOMMAND, Label = "Test Bottom", UID = (uint) CommonContextMenuItem.Properties});
+            builder.AddCommand(new ShellMenuCommand
+            {
+                Flags = MFT.BYCOMMAND,
+                Label = "Test Bottom",
+                UID = (uint) CommonContextMenuItem.Properties
+            });
 
             return builder;
         }
@@ -190,7 +217,7 @@ namespace BrowserTester
                 return;
             }
 
-            ShellContextMenu menu = new ShellContextMenu(folder, folderAction, GetFolderCommandBuilder());
+            ShellFolderContextMenu menu = new ShellFolderContextMenu(folder, folderAction, GetFolderCommandBuilder());
 
             e.Handled = true;
         }
@@ -201,8 +228,8 @@ namespace BrowserTester
 
             if (item is ShellFile file)
             {
-                ShellContextMenu menu = new ShellContextMenu(new ShellItem[] {file}, handle, executeAction, true,
-                    GetFileCommandBuilderTop(), GetFileCommandBuilderBottom());
+                ShellItemContextMenu menu = new ShellItemContextMenu(new ShellItem[] {file}, handle, executeAction, true,
+                    GetFileCommandBuilderTop(file), GetFileCommandBuilderBottom());
             }
 
             e.Handled = true;
@@ -214,7 +241,7 @@ namespace BrowserTester
 
             if (item is ShellFile file)
             {
-                ShellContextMenu menu = new ShellContextMenu(new ShellItem[] {file}, handle, executeAction, false);
+                ShellItemContextMenu menu = new ShellItemContextMenu(new ShellItem[] {file}, handle, executeAction, false);
             }
 
             e.Handled = true;
