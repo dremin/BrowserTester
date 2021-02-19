@@ -118,15 +118,23 @@ namespace BrowserTester
             {
                 ShellLogger.Info($"Command: {action} Path: {item.Path}");
 
-                if (action == "openFolder")
-                {
-                    Navigate(item.Path);
-                }
-                else if (action == ((uint) CommonContextMenuItem.Properties).ToString())
+                if (action == ((uint) CommonContextMenuItem.Properties).ToString())
                 {
                     ShellHelper.ShowFileProperties(item.Path);
                 }
             }
+        }
+
+        private bool openFolderAction(ShellItem[] items)
+        {
+            foreach (var item in items)
+            {
+                ShellLogger.Info($"Open folder: {item.Path}");
+
+                Navigate(item.Path);
+            }
+
+            return true;
         }
 
         private void folderAction(uint action, string path)
@@ -254,7 +262,7 @@ namespace BrowserTester
 
             if (item is ShellFile file)
             {
-                ShellItemContextMenu menu = new ShellItemContextMenu(new ShellItem[] {file}, folder, handle, executeAction, true,
+                ShellItemContextMenu menu = new ShellItemContextMenu(new ShellItem[] {file}, folder, handle, executeAction, openFolderAction, true,
                     GetFileCommandBuilderTop(file), GetFileCommandBuilderBottom());
             }
 
@@ -267,7 +275,7 @@ namespace BrowserTester
 
             if (item is ShellFile file)
             {
-                ShellItemContextMenu menu = new ShellItemContextMenu(new ShellItem[] {file}, folder, handle, executeAction, false);
+                ShellItemContextMenu menu = new ShellItemContextMenu(new ShellItem[] {file}, folder, handle, executeAction, openFolderAction, false);
             }
 
             e.Handled = true;
