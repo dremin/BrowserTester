@@ -112,29 +112,26 @@ namespace BrowserTester
 
         #region Context menu command handlers
 
-        private void executeAction(string action, ShellItem[] items)
+        private bool executeAction(string action, ShellItem[] items, bool allFolders)
         {
+            bool handled = false;
             foreach (var item in items)
             {
                 ShellLogger.Info($"Command: {action} Path: {item.Path}");
 
-                if (action == ((uint) CommonContextMenuItem.Properties).ToString())
+                if (action == "open" && allFolders)
+                {
+                    Navigate(item.Path);
+                    handled = true;
+                }
+                else if (action == ((uint) CommonContextMenuItem.Properties).ToString())
                 {
                     ShellHelper.ShowFileProperties(item.Path);
+                    handled = true;
                 }
             }
-        }
 
-        private bool openFolderAction(ShellItem[] items)
-        {
-            foreach (var item in items)
-            {
-                ShellLogger.Info($"Open folder: {item.Path}");
-
-                Navigate(item.Path);
-            }
-
-            return true;
+            return handled;
         }
 
         private void folderAction(uint action, string path)
@@ -262,7 +259,7 @@ namespace BrowserTester
 
             if (item is ShellFile file)
             {
-                ShellItemContextMenu menu = new ShellItemContextMenu(new ShellItem[] {file}, folder, handle, executeAction, openFolderAction, true,
+                ShellItemContextMenu menu = new ShellItemContextMenu(new ShellItem[] {file}, folder, handle, executeAction, true,
                     GetFileCommandBuilderTop(file), GetFileCommandBuilderBottom());
             }
 
@@ -275,7 +272,7 @@ namespace BrowserTester
 
             if (item is ShellFile file)
             {
-                ShellItemContextMenu menu = new ShellItemContextMenu(new ShellItem[] {file}, folder, handle, executeAction, openFolderAction, false);
+                ShellItemContextMenu menu = new ShellItemContextMenu(new ShellItem[] {file}, folder, handle, executeAction, false);
             }
 
             e.Handled = true;
@@ -292,17 +289,17 @@ namespace BrowserTester
 
         private void DesktopButton_OnClick(object sender, RoutedEventArgs e)
         {
-            Navigate("shell:::{B4BFCC3A-DB2C-424C-B029-7FE99A87C641}");
+            Navigate(Environment.GetFolderPath(Environment.SpecialFolder.Desktop, Environment.SpecialFolderOption.DoNotVerify));
         }
 
         private void ComputerButton_OnClick(object sender, RoutedEventArgs e)
         {
-            Navigate(string.Empty);
+            Navigate(ShellFolderPath.ComputerFolder.Value);
         }
 
         private void ControlPanelButton_OnClick(object sender, RoutedEventArgs e)
         {
-            Navigate("::{21EC2020-3AEA-1069-A2DD-08002B30309D}");
+            Navigate(ShellFolderPath.ControlPanelFolder.Value);
         }
 
         private void AppsButton_OnClick(object sender, RoutedEventArgs e)
